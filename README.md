@@ -398,3 +398,6 @@ Building Go toolchain1 using /usr/local/go.
 ../../../../src/cmd/compile/main.go:14: package bootstrap/cmd/compile/internal/ppc is not in GOROOT (/usr/local/go/src/bootstrap/cmd/compile/internal/ppc)
 go tool dist: FAILED: /usr/local/go/bin/go install -gcflags=-l -tags=math_big_pure_go compiler_bootstrap -v bootstrap/cmd/...: exit status 1
 ```
+
+Ok, we need to similarly clone `src/cmd/internal/obj/ppc64` to `ppc`.
+
