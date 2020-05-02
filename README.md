@@ -91,4 +91,6 @@ cmd/dist
 go tool dist: unknown $GOARCH ppc
 ```
 
+The first error comes from `src/cmd/go/internal/work/action.go`, in `func CheckGOOSARCHPair`.
 
+In `src/cmd/dist/build.go`, add `ppc` to the `okgoarch` array.

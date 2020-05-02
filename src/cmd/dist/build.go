@@ -68,6 +68,7 @@ var okgoarch = []string{
 	"mipsle",
 	"mips64",
 	"mips64le",
+	"ppc",
 	"ppc64",
 	"ppc64le",
 	"riscv64",
