@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package ppc64
+package ppc
 
 import (
 	"cmd/compile/internal/gc"
 	"cmd/internal/obj"
-	"cmd/internal/obj/ppc64"
+	"cmd/internal/obj/ppc"
 )
 
 func zerorange(pp *gc.Progs, p *obj.Prog, off, cnt int64, _ *uint32) *obj.Prog {
@@ -16,26 +16,26 @@ func zerorange(pp *gc.Progs, p *obj.Prog, off, cnt int64, _ *uint32) *obj.Prog {
 	}
 	if cnt < int64(4*gc.Widthptr) {
 		for i := int64(0); i < cnt; i += int64(gc.Widthptr) {
-			p = pp.Appendpp(p, ppc64.AMOVD, obj.TYPE_REG, ppc64.REGZERO, 0, obj.TYPE_MEM, ppc64.REGSP, gc.Ctxt.FixedFrameSize()+off+i)
+			p = pp.Appendpp(p, ppc.AMOVD, obj.TYPE_REG, ppc.REGZERO, 0, obj.TYPE_MEM, ppc.REGSP, gc.Ctxt.FixedFrameSize()+off+i)
 		}
 	} else if cnt <= int64(128*gc.Widthptr) {
-		p = pp.Appendpp(p, ppc64.AADD, obj.TYPE_CONST, 0, gc.Ctxt.FixedFrameSize()+off-8, obj.TYPE_REG, ppc64.REGRT1, 0)
-		p.Reg = ppc64.REGSP
+		p = pp.Appendpp(p, ppc.AADD, obj.TYPE_CONST, 0, gc.Ctxt.FixedFrameSize()+off-8, obj.TYPE_REG, ppc.REGRT1, 0)
+		p.Reg = ppc.REGSP
 		p = pp.Appendpp(p, obj.ADUFFZERO, obj.TYPE_NONE, 0, 0, obj.TYPE_MEM, 0, 0)
 		p.To.Name = obj.NAME_EXTERN
 		p.To.Sym = gc.Duffzero
 		p.To.Offset = 4 * (128 - cnt/int64(gc.Widthptr))
 	} else {
-		p = pp.Appendpp(p, ppc64.AMOVD, obj.TYPE_CONST, 0, gc.Ctxt.FixedFrameSize()+off-8, obj.TYPE_REG, ppc64.REGTMP, 0)
-		p = pp.Appendpp(p, ppc64.AADD, obj.TYPE_REG, ppc64.REGTMP, 0, obj.TYPE_REG, ppc64.REGRT1, 0)
-		p.Reg = ppc64.REGSP
-		p = pp.Appendpp(p, ppc64.AMOVD, obj.TYPE_CONST, 0, cnt, obj.TYPE_REG, ppc64.REGTMP, 0)
-		p = pp.Appendpp(p, ppc64.AADD, obj.TYPE_REG, ppc64.REGTMP, 0, obj.TYPE_REG, ppc64.REGRT2, 0)
-		p.Reg = ppc64.REGRT1
-		p = pp.Appendpp(p, ppc64.AMOVDU, obj.TYPE_REG, ppc64.REGZERO, 0, obj.TYPE_MEM, ppc64.REGRT1, int64(gc.Widthptr))
+		p = pp.Appendpp(p, ppc.AMOVD, obj.TYPE_CONST, 0, gc.Ctxt.FixedFrameSize()+off-8, obj.TYPE_REG, ppc.REGTMP, 0)
+		p = pp.Appendpp(p, ppc.AADD, obj.TYPE_REG, ppc.REGTMP, 0, obj.TYPE_REG, ppc.REGRT1, 0)
+		p.Reg = ppc.REGSP
+		p = pp.Appendpp(p, ppc.AMOVD, obj.TYPE_CONST, 0, cnt, obj.TYPE_REG, ppc.REGTMP, 0)
+		p = pp.Appendpp(p, ppc.AADD, obj.TYPE_REG, ppc.REGTMP, 0, obj.TYPE_REG, ppc.REGRT2, 0)
+		p.Reg = ppc.REGRT1
+		p = pp.Appendpp(p, ppc.AMOVDU, obj.TYPE_REG, ppc.REGZERO, 0, obj.TYPE_MEM, ppc.REGRT1, int64(gc.Widthptr))
 		p1 := p
-		p = pp.Appendpp(p, ppc64.ACMP, obj.TYPE_REG, ppc64.REGRT1, 0, obj.TYPE_REG, ppc64.REGRT2, 0)
-		p = pp.Appendpp(p, ppc64.ABNE, obj.TYPE_NONE, 0, 0, obj.TYPE_BRANCH, 0, 0)
+		p = pp.Appendpp(p, ppc.ACMP, obj.TYPE_REG, ppc.REGRT1, 0, obj.TYPE_REG, ppc.REGRT2, 0)
+		p = pp.Appendpp(p, ppc.ABNE, obj.TYPE_NONE, 0, 0, obj.TYPE_BRANCH, 0, 0)
 		gc.Patch(p, p1)
 	}
 
@@ -43,11 +43,11 @@ func zerorange(pp *gc.Progs, p *obj.Prog, off, cnt int64, _ *uint32) *obj.Prog {
 }
 
 func ginsnop(pp *gc.Progs) *obj.Prog {
-	p := pp.Prog(ppc64.AOR)
+	p := pp.Prog(ppc.AOR)
 	p.From.Type = obj.TYPE_REG
-	p.From.Reg = ppc64.REG_R0
+	p.From.Reg = ppc.REG_R0
 	p.To.Type = obj.TYPE_REG
-	p.To.Reg = ppc64.REG_R0
+	p.To.Reg = ppc.REG_R0
 	return p
 }
 
@@ -67,12 +67,12 @@ func ginsnopdefer(pp *gc.Progs) *obj.Prog {
 
 	ginsnop(pp)
 	if gc.Ctxt.Flag_shared {
-		p := pp.Prog(ppc64.AMOVD)
+		p := pp.Prog(ppc.AMOVD)
 		p.From.Type = obj.TYPE_MEM
 		p.From.Offset = 24
-		p.From.Reg = ppc64.REGSP
+		p.From.Reg = ppc.REGSP
 		p.To.Type = obj.TYPE_REG
-		p.To.Reg = ppc64.REG_R2
+		p.To.Reg = ppc.REG_R2
 		return p
 	}
 	return ginsnop(pp)

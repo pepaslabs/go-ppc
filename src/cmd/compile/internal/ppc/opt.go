@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package ppc64
+package ppc
 
 // Many Power ISA arithmetic and logical instructions come in four
 // standard variants. These bits let us map between variants.

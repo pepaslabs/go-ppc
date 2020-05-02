@@ -359,3 +359,36 @@ import (
    "cmd/compile/internal/ppc"
 ...
 ```
+
+We also need to create a new go module at `src/cmd/compile/internal/ppc`.
+We'll start by copying the `ppc64` directory.
+
+Edit each of the files in `src/cmd/compile/internal/ppc`,
+making the obvious trivial `ppc64` to `ppc` translations.
+
+In `src/cmd/compile/internal/ppc/galign.go`, we need to figure out what to use for `arch.MAXWIDTH`.
+Let's take a look at what the other arches do:
+
+```
+$ grep MAXWIDTH */galign.go
+amd64/galign.go:        arch.MAXWIDTH = 1 << 50
+arm64/galign.go:        arch.MAXWIDTH = 1 << 50
+arm/galign.go:  arch.MAXWIDTH = (1 << 32) - 1
+mips64/galign.go:       arch.MAXWIDTH = 1 << 50
+mips/galign.go: arch.MAXWIDTH = (1 << 31) - 1
+ppc64/galign.go:        arch.MAXWIDTH = 1 << 60
+ppc/galign.go:  arch.MAXWIDTH = 1 << 60
+riscv64/galign.go:      arch.MAXWIDTH = 1 << 50
+s390x/galign.go:        arch.MAXWIDTH = 1 << 50
+x86/galign.go:  arch.MAXWIDTH = (1 << 32) - 1
+```
+
+Interesting, I wonder why mips is shifted only 31 times, while arm and x86 are shifted 32 times?
+I'll assum ppc should be the same as x86 and arm.
+
+...
+
+```
+$ GOOS=linux GOARCH=ppc GOROOT_FINAL=/opt/go-linux-ppc ./make.bash -v
+...
+```
