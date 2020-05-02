@@ -1,44 +1,94 @@
-# The Go Programming Language
+# A Foolhardy Attempt to Port Golang to 32-bit PowerPC
 
-Go is an open source programming language that makes it easy to build simple,
-reliable, and efficient software.
+*Note: the original README.md has been moved [here](README-orig.md).*
 
-![Gopher image](doc/gopher/fiveyears.jpg)
-*Gopher image by [Renee French][rf], licensed under [Creative Commons 3.0 Attributions license][cc3-by].*
+Because Golang should be as ubiquitous as C :)
 
-Our canonical Git repository is located at https://go.googlesource.com/go.
-There is a mirror of the repository at https://github.com/golang/go.
+# Resources
 
-Unless otherwise noted, the Go source files are distributed under the
-BSD-style license found in the LICENSE file.
+A github [issue](https://github.com/golang/go/issues/22885) was created back in 2017.
 
-### Download and Install
+In the golang-dev thread "how to port golang to a new architecture", Aram Hăvărneanu
+[posted a plan](https://groups.google.com/forum/#!msg/golang-dev/SRUK7yJVA0c/JeoCRMwzBwAJ)
+for porting Golang:
 
-#### Binary Distributions
+```
+I've done many ports now, so the strategy I use
+is this (very simplified):
 
-Official binary distributions are available at https://golang.org/dl/.
+    1. Add GOOS/GOARCH support to the toolchain
 
-After downloading a binary release, visit https://golang.org/doc/install
-or load [doc/install.html](./doc/install.html) in your web browser for installation
-instructions.
+    2. Add some support for GOARCH in cmd/internal/obj
+    3. Add some support for GOARCH in cmd/asm
+    4. Add some support for GOOS/GOARCH in cmd/link
 
-#### Install From Source
+    5. Iterate through 2-3-4 until you can produse some kind
+       of binaries from assembly files. Depending on the specifics
+       of GOOS/GOARCH you might, or might not need to use external
+       linking.
 
-If a binary distribution is not available for your combination of
-operating system and architecture, visit
-https://golang.org/doc/install/source or load [doc/install-source.html](./doc/install-source.html)
-in your web browser for source installation instructions.
+    6. Once you can produce binaries, thoroughly test them (link
+       just assembly programs, without runtime). Basically make
+       sure the low-level toolchain works.
 
-### Contributing
+    7. Start working on the Go compiler for GOARCH.
 
-Go is the work of thousands of contributors. We appreciate your help!
+    8. Write a minimal alternative runtime for Go. The runtime
+       is much too complicated as a first test Go program. Basically
+       write your own runtime in assembly that is just stubbed
+       out, but can run a good bulk of the programs in go/test.
 
-To contribute, please read the contribution guidelines:
-	https://golang.org/doc/contribute.html
+    9. Once that works well enough, start using the real runtime.
+       This requires implementing a lot of assembly, but you can
+       use the lessons learned from #8.
 
-Note that the Go project uses the issue tracker for bug reports and
-proposals only. See https://golang.org/wiki/Questions for a list of
-places to ask questions about the Go language.
+    10. Make all the tests in go/test work.
+    11. Make all the stdlib tests work. You are still working
+        amd64 now, and executing on GOARCH with go_GOOS_GOARCH_exec.
 
-[rf]: https://reneefrench.blogspot.com/
-[cc3-by]: https://creativecommons.org/licenses/by/3.0/
+    12. Run bootstrap.bash
+
+    13. Move over the artifacts on GOOS/GOARCH machine.
+
+    14. Make sure make.bash works. You will still likely have
+        to fix problems to make this N-generation compiler work.
+
+    15. Make sure all.bash works.
+
+    16. Done.
+
+As you can see, steps 1-14 are done on amd64 (or some other supported
+platform), and only step 15 is done on the target architecture.
+```
+
+# Log
+
+## 2020/5/2 Sat
+
+Let's start at the beginning:
+
+```
+$ cd src
+$ cat > build-linux-ppc.sh <<EOF
+#!/bin/bash
+set -e
+export GOOS=linux
+export GOARCH=ppc
+export GOROOT_FINAL=/opt/go-linux-ppc
+./make.bash -v
+EOF
+$ chmod +x build-linux-ppc.sh
+$ ./build-linux-ppc.sh
+```
+
+Our first error:
+
+```
+$ ./build-linux-ppc.sh 
+cmd/go: unsupported GOOS/GOARCH pair linux/ppc
+Building Go cmd/dist using /usr/local/go. ()
+cmd/dist
+go tool dist: unknown $GOARCH ppc
+```
+
+
