@@ -201,4 +201,4 @@ Register naming
   LR represents the link register.
 
 */
-package ppc64
+package ppc

@@ -27,7 +27,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package ppc64
+package ppc
 
 import (
 	"cmd/internal/obj"
@@ -774,7 +774,7 @@ func preprocess(ctxt *obj.Link, cursym *obj.LSym, newprog obj.ProgAlloc) {
 				//	NOP
 				//
 				// The NOP is needed to give the jumps somewhere to land.
-				// It is a liblink NOP, not a ppc64 NOP: it encodes to 0 instruction bytes.
+				// It is a liblink NOP, not a ppc NOP: it encodes to 0 instruction bytes.
 
 				q = obj.Appendp(q, c.newprog)
 
@@ -1262,20 +1262,11 @@ func (c *ctxt9) stacksplit(p *obj.Prog, framesize int32) *obj.Prog {
 	return p
 }
 
-var Linkppc64 = obj.LinkArch{
-	Arch:           sys.ArchPPC64,
+var Linkppc = obj.LinkArch{
+	Arch:           sys.ArchPPC,
 	Init:           buildop,
 	Preprocess:     preprocess,
 	Assemble:       span9,
 	Progedit:       progedit,
-	DWARFRegisters: PPC64DWARFRegisters,
-}
-
-var Linkppc64le = obj.LinkArch{
-	Arch:           sys.ArchPPC64LE,
-	Init:           buildop,
-	Preprocess:     preprocess,
-	Assemble:       span9,
-	Progedit:       progedit,
-	DWARFRegisters: PPC64DWARFRegisters,
+	DWARFRegisters: PPCDWARFRegisters,
 }

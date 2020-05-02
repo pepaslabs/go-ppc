@@ -27,14 +27,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package ppc64
+package ppc
 
 import "cmd/internal/obj"
 
-//go:generate go run ../stringer.go -i $GOFILE -o anames.go -p ppc64
+//go:generate go run ../stringer.go -i $GOFILE -o anames.go -p ppc
 
 /*
- * powerpc 64
+ * powerpc
  */
 const (
 	NSNAME = 8
@@ -44,9 +44,9 @@ const (
 )
 
 const (
-	/* RBasePPC64 = 4096 */
+	/* RBasePPC = 4096 */
 	/* R0=4096 ... R31=4127 */
-	REG_R0 = obj.RBasePPC64 + iota
+	REG_R0 = obj.RBasePPC + iota
 	REG_R1
 	REG_R2
 	REG_R3
@@ -228,8 +228,8 @@ const (
 
 	REG_SPECIAL = REG_CR0
 
-	REG_SPR0 = obj.RBasePPC64 + 1024 // first of 1024 registers
-	REG_DCR0 = obj.RBasePPC64 + 2048 // first of 1024 registers
+	REG_SPR0 = obj.RBasePPC + 1024 // first of 1024 registers
+	REG_DCR0 = obj.RBasePPC + 2048 // first of 1024 registers
 
 	REG_XER = REG_SPR0 + 1
 	REG_LR  = REG_SPR0 + 8
@@ -257,13 +257,13 @@ const (
 
 // OpenPOWER ABI for Linux Supplement Power Architecture 64-Bit ELF V2 ABI
 // https://openpowerfoundation.org/?resource_lib=64-bit-elf-v2-abi-specification-power-architecture
-var PPC64DWARFRegisters = map[int16]int16{}
+var PPCDWARFRegisters = map[int16]int16{}
 
 func init() {
 	// f assigns dwarfregister[from:to] = (base):(to-from+base)
 	f := func(from, to, base int16) {
 		for r := int16(from); r <= to; r++ {
-			PPC64DWARFRegisters[r] = r - from + base
+			PPCDWARFRegisters[r] = r - from + base
 		}
 	}
 	f(REG_R0, REG_R31, 0)
@@ -273,9 +273,9 @@ func init() {
 
 	f(REG_VS0, REG_VS31, 32)  // overlaps F0-F31
 	f(REG_VS32, REG_VS63, 77) // overlaps V0-V31
-	PPC64DWARFRegisters[REG_LR] = 65
-	PPC64DWARFRegisters[REG_CTR] = 66
-	PPC64DWARFRegisters[REG_XER] = 76
+	PPCDWARFRegisters[REG_LR] = 65
+	PPCDWARFRegisters[REG_CTR] = 66
+	PPCDWARFRegisters[REG_XER] = 76
 }
 
 /*
@@ -400,7 +400,7 @@ const (
 )
 
 const (
-	AADD = obj.ABasePPC64 + obj.A_ARCHSPECIFIC + iota
+	AADD = obj.ABasePPC + obj.A_ARCHSPECIFIC + iota
 	AADDCC
 	AADDIS
 	AADDV

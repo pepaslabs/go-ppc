@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package ppc64
+package ppc
 
 import (
 	"internal/testenv"
@@ -61,7 +61,7 @@ func TestPCalign(t *testing.T) {
 
 	// build generated file without errors and assemble it
 	cmd := exec.Command(testenv.GoToolPath(t), "tool", "asm", "-o", filepath.Join(dir, "x.o"), "-S", tmpfile)
-	cmd.Env = append(os.Environ(), "GOARCH=ppc64le", "GOOS=linux")
+	cmd.Env = append(os.Environ(), "GOARCH=ppc", "GOOS=linux")
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		t.Errorf("Build failed: %v, output: %s", err, out)
@@ -101,7 +101,7 @@ func TestPCalign(t *testing.T) {
 
 	// build test with errors and check for messages
 	cmd = exec.Command(testenv.GoToolPath(t), "tool", "asm", "-o", filepath.Join(dir, "xi.o"), "-S", tmpfile)
-	cmd.Env = append(os.Environ(), "GOARCH=ppc64le", "GOOS=linux")
+	cmd.Env = append(os.Environ(), "GOARCH=ppc", "GOOS=linux")
 	out, err = cmd.CombinedOutput()
 	if !strings.Contains(string(out), "Unexpected alignment") {
 		t.Errorf("Invalid alignment not detected for PCALIGN\n")

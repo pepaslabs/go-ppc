@@ -27,7 +27,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package ppc64
+package ppc
 
 import (
 	"cmd/internal/obj"
@@ -674,7 +674,7 @@ func span9(ctxt *obj.Link, cursym *obj.LSym, newprog obj.ProgAlloc) {
 	}
 
 	if oprange[AANDN&obj.AMask] == nil {
-		ctxt.Diag("ppc64 ops not initialized, call ppc64.buildop first")
+		ctxt.Diag("ppc ops not initialized, call ppc.buildop first")
 	}
 
 	c := ctxt9{ctxt: ctxt, newprog: newprog, cursym: cursym, autosize: int32(p.To.Offset)}
@@ -2546,7 +2546,7 @@ func (c *ctxt9) asmout(p *obj.Prog, o *Optab, out []uint32) {
 				rel.Off = int32(c.pc)
 				rel.Siz = 4
 				// This (and the matching part in the load case
-				// below) are the only places in the ppc64 toolchain
+				// below) are the only places in the ppc toolchain
 				// that knows the name of the tls variable. Possibly
 				// we could add some assembly syntax so that the name
 				// of the variable does not have to be assumed.
@@ -2725,7 +2725,7 @@ func (c *ctxt9) asmout(p *obj.Prog, o *Optab, out []uint32) {
 				o1 |= 1 << 5 /* mb[5] is top bit */
 			}
 
-		// These opcodes use a shift count like the ppc64 asm, no mask conversion done
+		// These opcodes use a shift count like the ppc asm, no mask conversion done
 		case ARLDICR, ARLDICRCC:
 			me := int(d)
 			sh := c.regoff(&p.From)
@@ -3025,7 +3025,7 @@ func (c *ctxt9) asmout(p *obj.Prog, o *Optab, out []uint32) {
 		d := c.vregoff(p.GetFrom3())
 
 		// Original opcodes had mask operands which had to be converted to a shift count as expected by
-		// the ppc64 asm.
+		// the ppc asm.
 		switch p.As {
 		case ARLDMI, ARLDMICC:
 			var mask [2]uint8

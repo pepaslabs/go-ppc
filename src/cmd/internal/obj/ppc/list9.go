@@ -27,7 +27,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package ppc64
+package ppc
 
 import (
 	"cmd/internal/obj"
@@ -35,8 +35,8 @@ import (
 )
 
 func init() {
-	obj.RegisterRegister(obj.RBasePPC64, REG_DCR0+1024, rconv)
-	obj.RegisterOpcode(obj.ABasePPC64, Anames)
+	obj.RegisterRegister(obj.RBasePPC, REG_DCR0+1024, rconv)
+	obj.RegisterOpcode(obj.ABasePPC, Anames)
 }
 
 func rconv(r int) string {
@@ -90,7 +90,7 @@ func rconv(r int) string {
 		return "MSR"
 	}
 
-	return fmt.Sprintf("Rgok(%d)", r-obj.RBasePPC64)
+	return fmt.Sprintf("Rgok(%d)", r-obj.RBasePPC)
 }
 
 func DRconv(a int) string {
