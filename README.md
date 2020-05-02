@@ -268,3 +268,94 @@ go tool dist: FAILED: /home/cell/github/pepaslabs/go-linux-ppc-bootstrap/pkg/too
 Ok, perhaps I first need to bootstrap `go` for my own platform (with updated `cgoEnabled` map),
 and then use that to build `go` for `linux/ppc`.
 
+```
+$ GOOS=linux GOARCH=amd64 ./bootstrap.bash 
+...
+Bootstrap toolchain for linux/amd64 installed in /home/cell/github/pepaslabs/go-linux-amd64-bootstrap.
+Building tbz.
+-rw-r--r-- 1 cell cell 122118427 May  2 15:30 /home/cell/github/pepaslabs/go-linux-amd64-bootstrap.tbz
+```
+
+```
+$ ../../go-linux-amd64-bootstrap/bin/go tool dist list | grep ppc
+aix/ppc64
+linux/ppc
+linux/ppc64
+linux/ppc64le
+```
+
+Ok!  Got past the first build error :)
+
+I'll prepend that bootstrap toolchain to my `$PATH` and use it while working on this project.
+
+```
+$ export PATH="/home/cell/github/pepaslabs/go-linux-amd64-bootstrap/bin:$PATH"
+$ which go
+/home/cell/github/pepaslabs/go-linux-amd64-bootstrap/bin/go
+$ go tool dist list | grep ppc
+aix/ppc64
+linux/ppc
+linux/ppc64
+linux/ppc64le
+```
+
+Ok, next failure:
+
+```
+$ ./build-linux-ppc.sh
+...
+Building packages and commands for target, linux/ppc.
+go tool compile: exit status 2
+compile: unknown architecture "ppc"
+go tool compile: exit status 2
+compile: unknown architecture "ppc"
+go tool dist: FAILED: /home/cell/github/pepaslabs/go-ppc/pkg/tool/linux_amd64/go_bootstrap install -gcflags=all= -ldflags=all= -v std cmd: exit status 1
+```
+
+This comes from `cmd/compile/main.go`:
+
+```
+$ grep -n -r 'compile: unknown architec' .
+./cmd/compile/main.go:48:               fmt.Fprintf(os.Stderr, "compile: unknown architecture %q\n", objabi.GOARCH)
+```
+
+Oh, hmm, I can now run `./make.bash`, which installs a `go` into `./bin` which has `linux/ppc` in its `cgoEnabled` map:
+
+```
+$ ./make.bash
+...
+$ ../bin/go tool dist list | grep ppc
+aix/ppc64
+linux/ppc
+linux/ppc64
+linux/ppc64le
+```
+
+So now I no longer need the bootstrap toolchain in `go-linux-amd64-bootstrap`.
+
+I'll start a new shell and `export PATH="/home/cell/github/pepaslabs/go-ppc/bin:$PATH"`.
+
+```
+$ export PATH="/home/cell/github/pepaslabs/go-ppc/bin:$PATH"
+$ go tool dist list | grep ppc
+aix/ppc64
+linux/ppc
+linux/ppc64
+linux/ppc64le
+```
+
+Now I should be able to edit the golang source and simply run `./make.bash`.
+
+Returning to our error, we need to add an entry to the `archInits` map in `src/cmd/compile/main.go`:
+
+```
+	"ppc":      ppc.Init,
+```
+
+We also need to add an import entry to the same file:
+
+```
+import (
+   "cmd/compile/internal/ppc"
+...
+```
