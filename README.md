@@ -232,3 +232,39 @@ $ cat cmd/go/internal/cfg/zosarch.go | grep ppc
         "linux/ppc64": false,
         "linux/ppc64le": true,
 ```
+
+Ah, in `src/cmd/dist/build.go`, we see this:
+
+```
+// Cannot use go/build directly because cmd/dist for a new release
+// builds against an old release's go/build, which may be out of sync.
+// To reduce duplication, we generate the list for go/build from this.
+//
+// We list all supported platforms in this list, so that this is the
+// single point of truth for supported platforms. This list is used
+// by 'go tool dist list'.
+var cgoEnabled = map[string]bool{
+```
+
+Now let's try bootstrapping again.
+
+```
+$ GOOS=linux GOARCH=ppc ./bootstrap.bash 
+../../go-linux-ppc-bootstrap already exists; remove before continuing
+```
+
+Ok, let's clean that up and try again.
+
+```
+$ rm -rf ../../go-linux-ppc-bootstrap
+$ GOOS=linux GOARCH=ppc ./bootstrap.bash 
+Building packages and commands for host, linux/amd64.
+Building packages and commands for target, linux/ppc.
+go tool compile: exit status 2
+compile: unknown architecture "ppc"
+go tool dist: FAILED: /home/cell/github/pepaslabs/go-linux-ppc-bootstrap/pkg/tool/linux_amd64/go_bootstrap install -gcflags=all= -ldflags=all= std cmd: exit status 1
+```
+
+Ok, perhaps I first need to bootstrap `go` for my own platform (with updated `cgoEnabled` map),
+and then use that to build `go` for `linux/ppc`.
+
