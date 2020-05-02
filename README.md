@@ -386,9 +386,15 @@ x86/galign.go:  arch.MAXWIDTH = (1 << 32) - 1
 Interesting, I wonder why mips is shifted only 31 times, while arm and x86 are shifted 32 times?
 I'll assum ppc should be the same as x86 and arm.
 
-...
+Ok, next error:
 
 ```
 $ GOOS=linux GOARCH=ppc GOROOT_FINAL=/opt/go-linux-ppc ./make.bash -v
-...
+cmd/go: unsupported GOOS/GOARCH pair linux/ppc
+Building Go cmd/dist using /usr/local/go. ()
+cmd/dist
+
+Building Go toolchain1 using /usr/local/go.
+../../../../src/cmd/compile/main.go:14: package bootstrap/cmd/compile/internal/ppc is not in GOROOT (/usr/local/go/src/bootstrap/cmd/compile/internal/ppc)
+go tool dist: FAILED: /usr/local/go/bin/go install -gcflags=-l -tags=math_big_pure_go compiler_bootstrap -v bootstrap/cmd/...: exit status 1
 ```
